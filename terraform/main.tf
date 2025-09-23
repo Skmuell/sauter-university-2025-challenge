@@ -50,11 +50,6 @@ resource "google_artifact_registry_repository" "artifact_registry_repository" {
   format        = "DOCKER"
 }
 
-resource "google_service_account" "cloud_run_sa" {
-  account_id   = "cloud-run-agentes-sa" 
-  display_name = "Service Account for Cloud Run Agents API"
-}
-
 resource "google_project_iam_member" "bigquery_viewer_cloud_run" {
   project = var.gcp_project_id
   role    = "roles/bigquery.dataViewer"
@@ -74,15 +69,6 @@ resource "google_cloud_run_v2_service" "api_agents" {
     }
   }
 
-}
-
-# IAM: Allow Cloud Run public invocation
-resource "google_cloud_run_v2_service_iam_member" "allow_public_invocation" {
-  project  = google_cloud_run_v2_service.api_agents.project
-  location = google_cloud_run_v2_service.api_agents.location
-  name     = google_cloud_run_v2_service.api_agents.name
-  role     = "roles/run.invoker"
-  member   = "allUsers"
 }
 
 # Billing Limit and Budget alerts

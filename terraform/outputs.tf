@@ -16,10 +16,10 @@ output "workload_identity_provider" {
 
 output "artifact_registry_repository_name" {
   description = "The name of the repository in Artifact Registry where Docker images are stored."
-  value       = google_artifact_registry_repository.nosso_repositorio.name
+  value       = google_artifact_registry_repository.artifact_registry_repository.name
 }
 
 output "ons_data_bucket_name" {
   description = "The name of the Cloud Storage bucket for the raw ONS data."
-  value       = google_storage_bucket.dados_ons.name
+  value       = google_storage_bucket.ons_data.name
 }
