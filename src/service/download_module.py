@@ -1,10 +1,10 @@
 import requests
 import logging
-from datetime import datetime
-from typing import List, Dict
-from datetime import timedelta
-from typing import Optional
-
+from datetime import datetime, timedelta
+from typing import List, Dict, Optional
+import os
+import pandas as pd # type: ignore
+import pyarrow.parquet as pq # type: ignore
 
 
 logging.basicConfig(
@@ -13,30 +13,9 @@ logging.basicConfig(
     handlers=[logging.FileHandler("download_ear.log"), logging.StreamHandler()]
 )
 
+DOWNLOAD_DIR = "src/downloads"
 
-def download_excel_file(url: str, output_excel: str) -> str:
-    """
-    Downloads an Excel file from a URL and saves it locally.
-    
-    :param url: URL of the Excel file
-    :param output_excel: Path where the Excel file will be saved
-    :return: Path to the saved Excel file
-    """
-    try:
-        print(f"Downloading file: {url}")
-        response = requests.get(url, stream=True)
-        response.raise_for_status()
-
-        with open(output_excel, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-
-        print(f"File downloaded and saved as: {output_excel}")
-        return output_excel
-    except requests.exceptions.RequestException as e:
-        print(f"Error downloading the file: {e}")
-        raise
-
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 def filter_by_year(
     data: List[Dict],
@@ -64,10 +43,10 @@ def filter_by_year(
     ]
 
 
-def download_resources(json_data: Dict):
+def download_resource(json_data: Dict):
     """
-    Receives a JSON with 'data' containing resource IDs, downloads each CSV, 
-    and saves it locally with the resource name.
+    Receives a JSON with 'data' containing resource IDs, downloads each file, 
+    forces types, and saves locally as Parquet inside DOWNLOAD_DIR, overwriting the original.
     """
     for item in json_data.get("data", []):
         resource_id = item.get("id")
@@ -78,16 +57,20 @@ def download_resources(json_data: Dict):
 
         url = f"https://dados.ons.org.br/api/3/action/resource_show?id={resource_id}"
         res = requests.get(url).json()
-
         resource_url = res.get("result", {}).get("url")
         if not resource_url:
-            print(f"URL não encontrada para {resource_id}")
+            logging.warning(f"URL not found for {resource_id}")
             continue
 
         file_res = requests.get(resource_url)
-        filename = f"{resource_name}.parquet"
-
-        with open(filename, "wb") as f:
+        filepath = os.path.join(DOWNLOAD_DIR, f"{resource_name}.parquet")
+        with open(filepath, "wb") as f:
             f.write(file_res.content)
 
-        print(f"Download concluído: {filename}")
+        df = pd.read_parquet(filepath)
+
+        df = df.astype(str)
+
+        df.to_parquet(filepath, index=False)
+
+        logging.info(f"✅ Download and type conversion completed: {filepath}")
