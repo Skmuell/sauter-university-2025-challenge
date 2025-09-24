@@ -4,7 +4,7 @@ from src.service.ons_api import get_resource_ids
 from pydantic import BaseModel
 from fastapi import Request
 from src.service.download_module import filter_by_year
-from src.service.download_module import download_resource
+from src.service.download_module import download_resources
 from src.handler.gcs_handler import upload_folder_to_gcs
 
 
@@ -31,7 +31,7 @@ async def request_ons(request: Request):
 
         result = get_resource_ids(package_id) 
         result_filtered = filter_by_year(result, start_date, end_date)
-        download_resource({"data": result_filtered})
+        download_resources({"data": result_filtered})
         upload_folder_to_gcs("sauter-project-raw", "src/downloads", package_name)
         
         
