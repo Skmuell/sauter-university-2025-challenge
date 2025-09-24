@@ -10,23 +10,26 @@ terraform {
 provider "google" {
   project = var.gcp_project_id
   region  = var.gcp_region
+  billing_project = var.gcp_project_id
+  user_project_override = true
 }
 
-// API´s 
-resource "google_project_service" "storage_api" {
-  service = "storage.googleapis.com"
-}
-
-resource "google_project_service" "bigquery_api" {
-  service = "bigquery.googleapis.com"
-}
-
-resource "google_project_service" "artifactregistry_api" {
-  service = "artifactregistry.googleapis.com"
-}
-
-resource "google_project_service" "run_api" {
-  service = "run.googleapis.com"
+resource "google_project_service" "apis" {
+  project = var.gcp_project_id
+  for_each = toset([
+    "storage.googleapis.com",
+    "bigquery.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "run.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "monitoring.googleapis.com",
+    "billingbudgets.googleapis.com",
+    "cloudbilling.googleapis.com", 
+    "aiplatform.googleapis.com"
+  ])
+  service                    = each.key
+  disable_on_destroy         = false
+  disable_dependent_services = true
 }
 
 // Creating Resources
@@ -48,12 +51,6 @@ resource "google_artifact_registry_repository" "artifact_registry_repository" {
   repository_id = "agents-api-repo" # Repository Name
   description   = "Repository for agent API images."
   format        = "DOCKER"
-}
-
-resource "google_project_iam_member" "bigquery_viewer_cloud_run" {
-  project = var.gcp_project_id
-  role    = "roles/bigquery.dataViewer"
-  member  = "serviceAccount:${google_service_account.cloud_run_sa.email}"
 }
 
 resource "google_cloud_run_v2_service" "api_agents" {

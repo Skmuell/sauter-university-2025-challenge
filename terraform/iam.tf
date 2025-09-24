@@ -1,20 +1,14 @@
 
 
 resource "google_service_account" "cloud_run_sa" {
-  account_id   = "cloud-run-agentes-sa"
+  account_id   = "cloud-run-agents-sa"
   display_name = "Service Account for Cloud Run Agents API"
 }
 
 resource "google_project_iam_member" "bigquery_user_cloud_run" {
   project = var.gcp_project_id
-  role    = "roles/bigquery.user"
+  role    = "roles/bigquery.dataViewer"
   member  = "serviceAccount:${google_service_account.cloud_run_sa.email}"
-}
-
-resource "google_project_service" "vertex_ai_api" {
-  project            = var.gcp_project_id
-  service            = "aiplatform.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_cloud_run_v2_service_iam_member" "allow_public_invocation" {
@@ -40,7 +34,7 @@ resource "google_project_iam_member" "github_actions_roles" {
     "roles/iam.serviceAccountUser" 
   ])
   role   = each.key
-  member = google_service_account.github_actions_sa.member
+  member = "serviceAccount:${google_service_account.github_actions_sa.email}"
 }
 
 # Workload Identity for securely connecting to GitHub
@@ -54,9 +48,13 @@ resource "google_iam_workload_identity_pool_provider" "github_provider" {
   workload_identity_pool_provider_id = "github-provider"
   display_name                       = "Github Actions Provider"
   attribute_mapping = {
-    "google.subject"       = "assertion.sub",
-    "attribute.repository" = "assertion.repository",
+    "google.subject"       = "assertion.sub"
+    "attribute.repository" = "assertion.repository"
+    "attribute.actor"      = "assertion.actor"
+    "attribute.aud"        = "assertion.aud"
   }
+
+  attribute_condition = "attribute.repository == '${var.github_repo}'"
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
   }

@@ -1,7 +1,7 @@
 
 variable "gcp_project_id" {
   type    = string
-  default = "sauter-university-project" 
+  default = "projeto-teste-473013" 
 }
 
 variable "gcp_region" {
