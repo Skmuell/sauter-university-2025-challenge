@@ -94,3 +94,11 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           region: ${{ env.GCP_REGION }}
           image: ${{ needs.build-and-push.outputs.image_url }}
+
+          env_vars: |
+            PROJECT_ID=${{ env.GCP_PROJECT_ID }}
+            GCS_BUCKET_NAME=${{ env.GCP_PROJECT_ID }}-ons-raw-data
+            BQ_DATASET=hydrological_data_ons
+            BQ_TABLE=trusted_ear_diario_por_reservatorio 
+            DATASET_TRUSTED=trusted_data 
+            DATASET_RAW=hydrological_data_ons 

@@ -78,8 +78,28 @@ resource "google_cloud_run_v2_service" "api_agents" {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
 
       env {
+        name  = "PROJECT_ID"
+        value = var.gcp_project_id
+      }
+      env {
         name  = "GCS_BUCKET_NAME"
         value = google_storage_bucket.ons_data.name
+      }
+      env {
+        name  = "BQ_DATASET" 
+        value = google_bigquery_dataset.dataset_ons.dataset_id
+      }
+      env {
+        name  = "BQ_TABLE"
+        value = "trusted_ear_diario_por_reservatorio"
+      }
+      env {
+        name  = "DATASET_TRUSTED"
+        value = google_bigquery_dataset.dataset_trusted.dataset_id
+      }
+      env {
+        name  = "DATASET_RAW"
+        value = google_bigquery_dataset.dataset_ons.dataset_id
       }
     }
     
