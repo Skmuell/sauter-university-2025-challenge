@@ -1,4 +1,4 @@
-# README.md completo para o projeto ONS
+# README_API.md completo para a parte da api do projeto
 
 # Projeto: Download e Upload de Recursos ONS
 
@@ -52,7 +52,7 @@ O sistema garante:
 ### Setup Local
 
 ```bash
-git clone <repo_url>
+git clone <[repo_url](https://github.com/Skmuell/sauter-university-2025-challenge.git)>
 cd <repo_folder>
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
@@ -76,12 +76,14 @@ Fazer `POST` no endpoint `/get_data` com JSON:
 ```json
 [
   {
-    "package_id": "uuid-do-pacote",
-    "package_name": "ear_diario_por_reservatorio",
-    "start_date": "01-01-2025",
-    "end_date": "23-09-2025"
+ 
+  "package_name": "ear_diario_por_reservatorio",
+  "package_id": "61e92787-9847-4731-8b73-e878eb5bc158",
+  "start_date": "",
+  "end_date": ""
+
   }
-]
+]  
 ```
 
 * Ver logs no console ou em `download_ear.log`
@@ -138,11 +140,11 @@ Para reverter upload: deletar arquivos do GCS ou restaurar backup local.
 
 ## 9. Changelog
 
-| Versão | Data       | Alterações                                             |
-| ------ | ---------- | ------------------------------------------------------ |
-| 0.1    | 2025-09-20 | Estrutura inicial da API, download de recursos Parquet |
-| 0.2    | 2025-09-21 | Upload para GCS, limpeza de pastas locais              |
-| 0.3    | 2025-09-22 | Logging, filtragem por ano, tratamento de erros        |
+| Data       | Alterações                                             |
+| ---------- | ------------------------------------------------------ |
+| 2025-09-20 | Estrutura inicial da API, download de recursos Parquet |
+| 2025-09-21 | Upload para GCS, limpeza de pastas locais              |
+| 2025-09-22 | Logging, filtragem por ano, tratamento de erros        |
 
 ---
 
@@ -158,4 +160,4 @@ pyarrow
 google-cloud-storage
 bigquery
 ```
-![alt text](sauter-university-2025-challenge\img\image.png)
+
