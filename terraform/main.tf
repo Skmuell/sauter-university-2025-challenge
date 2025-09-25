@@ -51,6 +51,13 @@ resource "google_bigquery_dataset" "dataset_ons" {
   depends_on = [google_project_service.apis]
 }
 
+resource "google_bigquery_dataset" "dataset_trusted" {
+  dataset_id = "trusted_data" 
+  project    = var.gcp_project_id
+  location   = var.gcp_region
+  depends_on = [google_project_service.apis]
+}
+
 resource "google_artifact_registry_repository" "artifact_registry_repository" {
   location      = var.gcp_region
   repository_id = "agents-api-repo" # Repository Name
