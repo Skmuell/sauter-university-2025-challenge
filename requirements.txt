@@ -18,3 +18,12 @@ setuptools>=65.0.0
 termcolor==2.4.0
 gunicorn==22.0.0
 pydantic
+google-cloud-aiplatform 
+pandas                  
+beautifulsoup4          
+requests                
+pytest                   
+pytest-mock              
+google-adk               
+python-multipart
+db-dtypes

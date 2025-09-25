@@ -1,3 +1,11 @@
 terraform.tfvars
 terraform.tfstate*
 .terraform*
+sauter_app/.env
+.venv/
+y/
+google-cloud-sdk/
+__pycache__/
+*.pyc
+.vscode/
+adk_help.txt

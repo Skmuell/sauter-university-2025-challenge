@@ -1,52 +1,92 @@
-# sauter-university-2025-challenge
+# Multi-Agent System – Sauter & ONS
 
+## Overview
+This project implements a **multi-agent system** designed to provide real-time and reliable answers about the company **Sauter** and the **ONS (Operador Nacional do Sistema Elétrico)**.  
+The architecture uses **Gemini models**, **Google Search**, and **BigQuery** to integrate structured and unstructured data into a single interface.
 
-![Architecture](./img/university.drawio.png)
+---
 
-Sobre o desafio: 
+## Agents
 
-> Realizar a implementação vista na arquitetura acima;
+### Sauter Agent (`sauter_expert`)
+- **Model:** `gemini-2.0-flash`
+- **Purpose:** Acts as an expert on the **Sauter company**.
+- **Tool:** `google_search`
+- **Description:**
+  Retrieves official information from the website [`sauter.digital`](https://sauter.digital) and other indexed sources.
+- **Answers questions about:**
+  - Contact details and institutional info.
+  - Services and solutions.
+  - Portfolio and projects.
+- **Instruction:**
+  > Always use the official Sauter website or reliable indexed sources to provide accurate answers.
 
-Cada equipe se divida em grupos de 5 pessoas. Cada equipe precisará desenvolver o esquema apresentado na arquitetura, seguindo as boas práticas de engenharia de dados, de software e do Google Cloud.
-Cada equipe deverá realizar uma demonstração PRÁTICA sobre a sua solução, pontuando explicitamente cada ponto destacado abaixo:
-- Pitch, “Why Google?” (apresentação teórica de no máximo 3~5 minutos)
+---
 
-- Integração com a ferramenta de CI/CD (github actions);
+### ONS Agent (`ons_expert`)
+- **Model:** `gemini-2.0-flash`
+- **Purpose:** Specialist in the **Brazilian electrical system**.
+- **Tool:** **BigQuery**
+- **Description:**
+  Queries structured datasets from **ONS** to provide up-to-date and official answers.
+- **Answers questions about:**
+  - Energy demand and historical data.
+  - Generation by source (hydro, thermal, wind, solar).
+  - Official reports and real-time data.
+- **Instruction:**
+  > Use BigQuery to query ONS datasets and always provide official and data-driven responses.
 
-- Terraform utilizado para levantar a infraestrutura;
+---
 
-- Pipeline de transformação dos dados;
-REST API que buscará os dados para uma data específica ou um conjunto de dados históricos;
+### Root Agent (`root_agent`)
+- **Model:** `gemini-2.0-flash`
+- **Purpose:** Orchestrator agent that routes questions to the correct specialized agent.
+- **Tools:**
+  - `AgentTool(sauter_expert)`
+  - `AgentTool(ons_expert)`
+- **Description:**
+  - Routes **Sauter-related** questions to the `sauter_expert`.
+  - Routes **energy/ONS-related** questions to the `ons_expert`.
+  - Can combine answers when needed.
 
-- Modelo preditivo que calcula o volume de água previsto para um reservatório (baseado no modelo de ENA)
+---
 
-> https://dados.ons.org.br/dataset/ear-diario-por-reservatorio
+## Interaction Flow
 
-OU apresentar a criação de um agente com o ADK + Gemini, com mecanismo de RAG, que consulta a base de dados HISTÓRICA de ENA e é capaz de responder dúvidas sobre o volume de uma bacia hidrográfica em um determinado período, o agente também deve responder dúvidas sobre a sauter, baseado nos dados do site oficial da sauter http://sauter.digital. 
-- Exibir em uma representação gráfica uma análise sobre os dados tratados.
+```mermaid
+flowchart TD
+    User([User]) --> RootAgent
+    RootAgent -->|Sauter questions| SauterAgent
+    RootAgent -->|Energy/ONS questions| ONSAgent
+    SauterAgent -->|Google Search + Official Website| FonteSauter
+    ONSAgent -->|BigQuery (ONS datasets)| FonteONS
+    FonteSauter --> RootAgent
+    FonteONS --> RootAgent
+    RootAgent --> User
+````
 
-### Critérios avaliados:
+---
 
-Além de todos os entregáveis acima, serão considerados:
-- Boas práticas de Engenharia de Software, como a utilização de padrões de projeto ou a utilização indevida de um padrão de projeto.
-- Boas práticas na construção de REST APIs.
-TODOS os integrantes do grupo precisam realizar commits e especificar as branchs trabalhadas.
-- Criação de budget alerts nos projetos, com custo máximo de 300 reais, e inclusão do email de ao menos 3 mentores como canal de envio, mais a equipe que construiu a solução, obrigatoriamente.
-- Repositório Privado no github.
-Utilização do workload identity federation.
-Containerização da API.
-- Documentação do código e docstrings.
-Justificativa de escolha do tipo de gráfico para exibição dos dados.
-- Utilizar obrigatoriamente a linguagem Python na criação da API.
-- Apresentar os testes de unidade e testes de integração mockados com a api de dados abertos, com cobertura mínima de 85%.
-- Para os grupos que escolherem criar o modelo preditivo, apresentar acurácia mínima de 70%, com testes nos conjuntos de dados, juntamente com a justificativa do modelo e das técnicas utilizadas.
-- Para os grupos que escolherem criar um agente, será necessário apresentar a resposta lúcida do modelo, incluindo o prompt utilizado e a justificativa do modelo, como o testes e a orquestração de agentes;
-- Explicitamente para as equipes que optarem pela criação de um agente, será necessário que o agente seja um “multi-agente”, ou seja, um orquestrador de outros agentes.
-Os agentes obrigatórios serão:
-Agente Orquestrador (root);
-Agente que responde as perguntas sobre a ENA;
-Agente que tira dúvidas sobre a sauter, consultando o site da Sauter (sauter.digital);
+## Design Decisions
 
-- modelo spotify 
+* Only **one built-in tool** per root agent (ADK limitation).
+* **ONS Agent** directly queries **BigQuery** → ensures fresh and official data.
+* **Sauter Agent** uses **Google Search** as a dynamic connector to the website.
+* **Root Agent** orchestrates all requests, giving the user a single point of access.
 
-- Geral de dados 
+---
+
+## Current Limitations
+
+* Sauter Agent depends on **Google Search** indexing quality.
+* ONS Agent only retrieves data from the configured **BigQuery dataset**.
+* Built-in tool restrictions require careful orchestration.
+
+---
+
+## Next Steps
+
+1. Extend ONS datasets in BigQuery (include predictions and newer reports).
+2. Implement a **cache layer** for repeated queries.
+3. Expand Sauter Agent with institutional PDFs and documents.
+4. Add **usage dashboards** for monitoring and metrics.
