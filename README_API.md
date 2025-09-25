@@ -1,5 +1,3 @@
-# README_API.md completo para a parte da api do projeto
-
 # Projeto: Download e Upload de Recursos ONS
 
 # Autor da api: João Samuel Leal de Oliveira
@@ -160,4 +158,5 @@ pyarrow
 google-cloud-storage
 bigquery
 ```
+
 
