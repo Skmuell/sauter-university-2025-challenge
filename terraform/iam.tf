@@ -8,6 +8,12 @@ resource "google_service_account" "cloud_run_sa" {
 
 resource "google_project_iam_member" "cloud_run_bigquery_viewer" {
   project = var.gcp_project_id
+  role    = "roles/bigquery.dataViewer"
+  member  = "serviceAccount:${google_service_account.cloud_run_sa.email}"
+}
+
+resource "google_project_iam_member" "cloud_run_bigquery_job_user" {
+  project = var.gcp_project_id
   role    = "roles/bigquery.jobUser"
   member  = "serviceAccount:${google_service_account.cloud_run_sa.email}"
 }
