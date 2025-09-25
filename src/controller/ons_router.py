@@ -5,12 +5,12 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, APIRouter, Request, Query, HTTPException, status
 from pydantic import BaseModel
 from google.cloud import bigquery
-from src.utils.colored_log import create_logger
-from src.service.ons_api import get_resource_ids
-from src.service.download_module import filter_by_year, download_resources
-from src.service.pagination import fetch_records_from_bq, paginate_records
-from src.handler.gcs_handler import upload_folder_to_gcs
-from src.handler.bq_handler import check_has_updated, trigger_procedure
+from utils.colored_log import create_logger
+from service.ons_api import get_resource_ids
+from service.download_module import filter_by_year, download_resources
+from service.pagination import fetch_records_from_bq, paginate_records
+from handler.gcs_handler import upload_folder_to_gcs
+from handler.bq_handler import check_has_updated, trigger_procedure
 
 logger = create_logger("logger")
 router = APIRouter()
