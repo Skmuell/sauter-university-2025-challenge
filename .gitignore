@@ -1,15 +1,8 @@
-# Arquivo: .gitignore
-
-# Ambiente Virtual Python
-venv/
-
-# Pasta de instalação do Google Cloud SDK que foi criada no lugar errado
+sauter_app/.env
+.venv/
 y/
 google-cloud-sdk/
-
-# Arquivos de cache do Python
 __pycache__/
 *.pyc
-
-# Arquivos de configuração específicos do editor
 .vscode/
+adk_help.txt
