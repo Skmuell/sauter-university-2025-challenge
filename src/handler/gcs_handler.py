@@ -1,12 +1,9 @@
 from google.cloud import storage  # type: ignore
 from datetime import datetime
-from typing import Optional
 import shutil
 import os
-
 from google.cloud import storage  # type: ignore
 from datetime import datetime
-import os
 
 def upload_folder_to_gcs(bucket_name: str, source_folder: str,package_name: str):
     """
@@ -20,11 +17,11 @@ def upload_folder_to_gcs(bucket_name: str, source_folder: str,package_name: str)
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
 
-    # Pasta destino com dt=hoje
+    
     today_str = datetime.today().strftime("%Y-%m-%d")  # YYYY-MM-DD
     destination_folder = f"ons/{package_name}/dt={today_str}/"
 
-    # Upload arquivos
+    
     for root, _, files in os.walk(source_folder):
         for file in files:
             local_path = os.path.join(root, file)
@@ -33,7 +30,7 @@ def upload_folder_to_gcs(bucket_name: str, source_folder: str,package_name: str)
 
             blob = bucket.blob(blob_path)
             blob.upload_from_filename(local_path)
-            print(f"✅ Upload completed: {local_path} → gs://{bucket_name}/{blob_path}")
+            print(f"Upload completed: {local_path} → gs://{bucket_name}/{blob_path}")
 
             # Remove arquivo local
             os.remove(local_path)
