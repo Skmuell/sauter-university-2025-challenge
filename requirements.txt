@@ -6,3 +6,4 @@ pandas
 pyarrow
 google-cloud-storage
 bigquery
+gunicorn==22.0.0
