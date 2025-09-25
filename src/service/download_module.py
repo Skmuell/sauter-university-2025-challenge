@@ -34,8 +34,8 @@ def filter_by_year(
         start_year = yesterday.year
         end_year = today.year
     else:
-        start_year = datetime.strptime(start_date, "%d-%m-%Y").year
-        end_year = datetime.strptime(end_date, "%d-%m-%Y").year
+        start_year = datetime.strptime(start_date, "%Y-%m-%d").year
+        end_year = datetime.strptime(end_date, "%Y-%m-%d").year
 
     return [
         item for item in data
@@ -63,17 +63,15 @@ def download_resources(json_data: Dict):
             logging.warning(f"URL not found for {resource_id}")
             continue
 
-        # Local path
-        filepath = os.path.join(DOWNLOAD_DIR, f"{resource_name}.parquet")
 
-        # Download file
+        filepath = os.path.join(DOWNLOAD_DIR, f"{resource_name}.parquet")
         file_res = requests.get(resource_url)
         with open(filepath, "wb") as f:
             f.write(file_res.content)
 
-        # Read Parquet and force types
+    
         df = pd.read_parquet(filepath)
         df = df.astype(str)
         df.to_parquet(filepath, index=False)
 
-        logging.info(f"✅ Download and type conversion completed: {filepath}")
+        logging.info(f"Download and type conversion completed: {filepath}")
