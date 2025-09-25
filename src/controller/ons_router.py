@@ -1,21 +1,16 @@
-from src.utils.colored_log import create_logger
-from fastapi import status,APIRouter
-from src.service.ons_api import get_resource_ids
-from pydantic import BaseModel
-from fastapi import Request
-from src.service.download_module import filter_by_year
-from src.service.download_module import download_resources
-from src.handler.gcs_handler import upload_folder_to_gcs
-from src.handler.bq_handler import check_has_updated
-from src.handler.bq_handler import trigger_procedure
-import asyncio    
+import os
+import asyncio
 from typing import List, Optional
-from fastapi import FastAPI, Query, HTTPException
-from typing import List, Optional
-from google.cloud import bigquery
-from src.service.pagination import fetch_records_from_bq, paginate_records
 from dotenv import load_dotenv
-import os 
+from fastapi import FastAPI, APIRouter, Request, Query, HTTPException, status
+from pydantic import BaseModel
+from google.cloud import bigquery
+from src.utils.colored_log import create_logger
+from src.service.ons_api import get_resource_ids
+from src.service.download_module import filter_by_year, download_resources
+from src.service.pagination import fetch_records_from_bq, paginate_records
+from src.handler.gcs_handler import upload_folder_to_gcs
+from src.handler.bq_handler import check_has_updated, trigger_procedure
 
 
 logger = create_logger("logger")
