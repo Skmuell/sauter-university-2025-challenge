@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./src .
 
-CMD ["python", "api.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "api:app"]
