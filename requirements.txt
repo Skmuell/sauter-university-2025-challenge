@@ -1,0 +1,9 @@
+google-cloud-aiplatform 
+pandas                  
+beautifulsoup4          
+requests                
+pytest                   
+pytest-mock              
+google-adk               
+python-multipart
+db-dtypes
