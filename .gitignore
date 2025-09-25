@@ -1,3 +1,6 @@
+terraform.tfvars
+terraform.tfstate*
+.terraform*
 sauter_app/.env
 .venv/
 y/

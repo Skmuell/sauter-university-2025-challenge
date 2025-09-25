@@ -1,5 +1,7 @@
 from google.cloud import bigquery
+from google.api_core.exceptions import NotFound
 from datetime import date
+from typing import cast
 
 def check_has_updated(project_id: str, dataset_id: str, table_id: str, start_date: str, end_date: str) -> bool:
     """
@@ -12,7 +14,7 @@ def check_has_updated(project_id: str, dataset_id: str, table_id: str, start_dat
         
         Returns:
             bool: True if records exist for today, False otherwise.
-        """
+    """
     client = bigquery.Client(project=project_id)
     today = date.today().strftime("%Y-%m-%d")
 
@@ -22,11 +24,18 @@ def check_has_updated(project_id: str, dataset_id: str, table_id: str, start_dat
         WHERE dt = '{today}'
     """
 
-    result = client.query(query).result()
-    for row in result:
-        return row.total > 0
-    return False
+    try:
+        result = client.query(query).result()
+        for row in result:
+            return cast(bool, row.total > 0)
+    except NotFound:
+        return False
+    except Exception as e:
 
+        print(f"An unexpected error occurred during BigQuery query: {e}")
+        return False
+
+    return False
 
 def trigger_procedure(project_id: str, dataset_id: str, procedure_name: str) -> None:
     """
@@ -49,4 +58,3 @@ def trigger_procedure(project_id: str, dataset_id: str, procedure_name: str) -> 
         print(f"Procedure {procedure_name} executed successfully.")
     except Exception as e:
         print(f"Failed to execute procedure {procedure_name}. Error: {e}")
-    

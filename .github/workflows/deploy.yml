@@ -1,0 +1,106 @@
+name: Agent API Deployment on Cloud Run
+
+# Trigger: runs whenever there is a push to the 'main' or 'develop' branch
+on:
+  push:
+    branches:
+      - "main"
+      - "feat/terraform"
+
+# Environment variables used in jobs
+env:
+  GCP_PROJECT_ID: onyx-smoke-473013-d6
+  GCP_REGION: us-central1
+  SERVICE_NAME: api-agents # Cloud Run Service name
+  REPOSITORY_NAME: agents-api-repo
+
+jobs:
+  # ----------------- STEP 1: (CI) -----------------
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository checkoutv
+        uses: actions/checkout@v4
+
+      - name: Config Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+  # ----------------- STEP 2: BUILD AND PUSH THE IMAGE -----------------
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: "read"
+      id-token: "write" # Essential for authentication with Google Cloud
+
+    outputs:
+      image_url: ${{ steps.push_image.outputs.image_url }}
+
+    steps:
+      - name: Repository Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud via Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+
+      - name: Build and Push Docker Image
+        id: push_image
+        run: |
+          # Generates the full image URL. The image tag will be the commit hash.
+          IMAGE_URL="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+
+          docker build -t $IMAGE_URL .
+
+          # Submit the image to the Artifact Registry
+          docker push $IMAGE_URL
+
+          # Saves the image URL for the next job to use
+          echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
+
+  # ----------------- STEP 3: DEPLOY CLOUD RUN (CD) -----------------
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: "write"
+      contents: "read"
+
+    steps:
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Deploy the new image to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          region: ${{ env.GCP_REGION }}
+          image: ${{ needs.build-and-push.outputs.image_url }}
+
+          service_account: "cloud-run-agents-sa@${{ env.GCP_PROJECT_ID }}.iam.gserviceaccount.com"
+
+          env_vars: |
+            PROJECT_ID=${{ env.GCP_PROJECT_ID }}
+            GCS_BUCKET_NAME=${{ env.GCP_PROJECT_ID }}-ons-raw-data
+            BQ_DATASET=hydrological_data_ons
+            BQ_TABLE=trusted_ear_diario_por_reservatorio 
+            DATASET_TRUSTED=trusted_data 
+            DATASET_RAW=hydrological_data_ons
