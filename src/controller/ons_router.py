@@ -1,11 +1,11 @@
-from src.utils.colored_log import create_logger
+from utils.colored_log import create_logger
 from fastapi import status,APIRouter
-from src.service.ons_api import get_resource_ids
+from service.ons_api import get_resource_ids
 from pydantic import BaseModel
 from fastapi import Request
-from src.service.download_module import filter_by_year
-from src.service.download_module import download_resources
-from src.handler.gcs_handler import upload_folder_to_gcs
+from service.download_module import filter_by_year
+from service.download_module import download_resources
+from handler.gcs_handler import upload_folder_to_gcs
 
 
 logger = create_logger("logger")
