@@ -69,7 +69,13 @@ resource "google_cloud_run_v2_service" "api_agents" {
 
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
+
+      env {
+        name  = "GCS_BUCKET_NAME"
+        value = google_storage_bucket.ons_data.name
+      }
     }
+    
   }
 
 }

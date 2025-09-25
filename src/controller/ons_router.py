@@ -1,3 +1,4 @@
+import os
 from utils.colored_log import create_logger
 from fastapi import status,APIRouter
 from service.ons_api import get_resource_ids
@@ -32,7 +33,8 @@ async def request_ons(request: Request):
         result = get_resource_ids(package_id) 
         result_filtered = filter_by_year(result, start_date, end_date)
         download_resources({"data": result_filtered})
-        upload_folder_to_gcs("sauter-project-raw", "src/downloads", package_name)
+        bucket_name = os.getenv("GCS_BUCKET_NAME")
+        upload_folder_to_gcs(bucket_name, "src/downloads", package_name)
         
         
         return {
