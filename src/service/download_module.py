@@ -5,7 +5,7 @@ import pandas as pd  # type: ignore
 from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 import shutil
-from handler.gcs_handler import upload_folder_to_gcs 
+from src.handler.gcs_handler import upload_folder_to_gcs 
 
 logging.basicConfig(
     level=logging.INFO,
