@@ -5,10 +5,11 @@ on:
   push:
     branches:
       - "main"
+      - "feat/terraform"
 
 # Environment variables used in jobs
 env:
-  GCP_PROJECT_ID: sauter-university-project
+  GCP_PROJECT_ID: onyx-smoke-473013-d6
   GCP_REGION: us-central1
   SERVICE_NAME: api-agents # Cloud Run Service name
   REPOSITORY_NAME: agents-api-repo
