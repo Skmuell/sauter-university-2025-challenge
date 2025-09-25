@@ -17,6 +17,9 @@ provider "google" {
 resource "google_project_service" "apis" {
   project = var.gcp_project_id
   for_each = toset([
+    "serviceusage.googleapis.com",
+    "cloudresourcemanager.googleapis.com", 
+    "iam.googleapis.com", 
     "storage.googleapis.com",
     "bigquery.googleapis.com",
     "artifactregistry.googleapis.com",
@@ -37,6 +40,7 @@ resource "google_storage_bucket" "ons_data" {
   name          = "${var.gcp_project_id}-ons-raw-data"
   location      = var.gcp_region
   force_destroy = true 
+  depends_on = [google_project_service.apis]
 }
 
 # BigQuery Dataset
@@ -44,6 +48,7 @@ resource "google_bigquery_dataset" "dataset_ons" {
   dataset_id = "hydrological_data_ons"
   project    = var.gcp_project_id
   location   = var.gcp_region
+  depends_on = [google_project_service.apis]
 }
 
 resource "google_artifact_registry_repository" "artifact_registry_repository" {
@@ -51,6 +56,7 @@ resource "google_artifact_registry_repository" "artifact_registry_repository" {
   repository_id = "agents-api-repo" # Repository Name
   description   = "Repository for agent API images."
   format        = "DOCKER"
+  depends_on = [google_project_service.apis]
 }
 
 resource "google_cloud_run_v2_service" "api_agents" {
